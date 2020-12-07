@@ -40,6 +40,13 @@ const SignUp = () => {
 			<input type="password" name="" className="form-control input_pass" value="" placeholder="password" />
 		    </div>
 
+			<div className="input-group mb-2">
+			<div className="input-group-append">
+			<span className="input-group-text"><i className="fa fa-key"></i></span>
+			</div>
+			<input type="password" name="" className="form-control input_pass" value="" placeholder="repeat password" />
+		    </div>
+
 			<div className="d-flex justify-content-center mt-3 login_container">
 			<button type="button" name="button" className="btn btn-outline-dark">Sign up</button>
 			</div>
