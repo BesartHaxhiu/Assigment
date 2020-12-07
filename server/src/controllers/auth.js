@@ -1,132 +1,84 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const {
-   createJWT,
-} = require("../utils/auth");
+const router = require("express").Router();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const auth = require("../middleware/auth");
+const User = require("../models/User");
 
-const emailRegexp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+exports.register =  async (req, res) => {
+  try {
+    let { username,email, password, passwordCheck } = req.body;
 
-exports.signup = (req, res, next) => {
-  let { name, email, password, password_confirmation } = req.body;
-  let errors = [];
-  if (!name) {
-    errors.push({ name: "required" });
-  }
-  if (!email) {
-    errors.push({ email: "required" });
-  }
-  if (!emailRegexp.test(email)) {
-    errors.push({ email: "invalid" });
-  }
-  if (!password) {
-    errors.push({ password: "required" });
-  }
-  if (!password_confirmation) {
-    errors.push({
-     password_confirmation: "required",
+    // validate
+
+    if ( !username || !email || !password || !passwordCheck)
+      return res.status(400).json({ msg: "Please fill all the field required" });
+    if (password.length < 5)
+      return res
+        .status(400)
+        .json({ msg: "The password is too short" });
+    if (password !== passwordCheck)
+      return res
+        .status(400)
+        .json({ msg: "The passwords doesn't match" });
+
+    const existingUser = await User.findOne({ email: email });
+    if (existingUser)
+      return res
+        .status(400)
+        .json({ msg: "An account with this email already exists." });
+
+
+    const salt = await bcrypt.genSalt();
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      username,
+      email,
+      password: passwordHash,
     });
+    const savedUser = await newUser.save();
+    res.json(savedUser);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  if (password != password_confirmation) {
-    errors.push({ password: "mismatch" });
-  }
-  if (errors.length > 0) {
-    return res.status(422).json({ errors: errors });
-  }
- User.findOne({email: email})
-    .then(user=>{
-       if(user){
-          return res.status(422).json({ errors: [{ user: "email already exists" }] });
-       }else {
-         const user = new User({
-           name: name,
-           email: email,
-           password: password,
-         });
- bcrypt.genSalt(10, function(err, salt) { bcrypt.hash(password, salt, function(err, hash) {
-         if (err) throw err;
-         user.password = hash;
-         user.save()
-             .then(response => {
-                res.status(200).json({
-                  success: true,
-                  result: response
-                })
-             })
-             .catch(err => {
-               res.status(500).json({
-                  errors: [{ error: err }]
-               });
-            });
-         });
-      });
-     }
-  }).catch(err =>{
-      res.status(500).json({
-        errors: [{ error: 'Something went wrong' }]
-      });
-  })
-}
+};
 
-exports.signin = (req, res) => {
-     let { email, password } = req.body;
-     let errors = [];
-     if (!email) {
-       errors.push({ email: "required" });
-     }
-     if (!emailRegexp.test(email)) {
-       errors.push({ email: "invalid email" });
-     }
-     if (!password) {
-       errors.push({ passowrd: "required" });
-     }
-     if (errors.length > 0) {
-      return res.status(422).json({ errors: errors });
-     }
-     User.findOne({ email: email }).then(user => {
-        if (!user) {
-          return res.status(404).json({
-            errors: [{ user: "not found" }],
-          });
-        } else {
-           bcrypt.compare(password, user.password).then(isMatch => {
-              if (!isMatch) {
-               return res.status(400).json({ errors: [{ password:
-"incorrect" }] 
-               });
-              }
-       let access_token = createJWT(
-          user.email,
-          user._id,
-          3600
-       );
-       jwt.verify(access_token, process.env.TOKEN_SECRET, (err,
-decoded) => {
-         if (err) {
-            res.status(500).json({ erros: err });
-         }
-         if (decoded) {
-             return res.status(200).json({
-                success: true,
-                token: access_token,
-                message: user
-             });
-           }
-         });
-        }).catch(err => {
-          res.status(500).json({ erros: err });
-        });
-      }
-   }).catch(err => {
-      res.status(500).json({ erros: err });
-   });
-}
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-//Get All the users
+    // validate
+    if (!email || !password)
+      return res.status(400).json({ msg: "Please fill all fields!" });
+
+    const user = await User.findOne({ email: email });
+    if (!user)
+      return res
+        .status(400)
+        .json({ msg: "An account with this email has not been found!" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials." });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    console.log("token",token);
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 exports.getUsers = async (req, res) => {
 	try {
 		const users = await User.find();
-		res.header('Content-Range', `course 0-10/${users.length}`);
+		res.header('All Users: ');
 		res.json(users);
 	} catch (err) {
 		console.log({
@@ -135,7 +87,6 @@ exports.getUsers = async (req, res) => {
 	}
 };
 
-//Get User by Id
 exports.getUserById = async (req,res) => {
   try{
     const id = req.params.userId;
@@ -148,23 +99,35 @@ exports.getUserById = async (req,res) => {
   }
 }
 
-//Delete User By Id
-exports.deleteUserById = async (req, res) => {
+exports.deleteUser = async (req, res) => {
 
-    const id = req.params.userId
-  
-    const deletedUser = await User.deleteOne({
-      _id: id,
-    })
+  const id = req.params.userId
+  const deletedUser = await User.deleteOne({
+    _id: id,
+  })
 
-    if(deletedUser.deletedCount == 0) {
-      res.status(404)
-      throw new Error("User not found")
-    }
+  if(deletedUser.deletedCount == 0) {
+    res.status(404)
+    throw new Error("User not found")
+  }
 
-    console.log(deletedUser)
-
-    res.status(200).json('User deleted' + deletedUser)
-  
-  
+  console.log(deletedUser)
+  res.status(200).json('User deleted' + deletedUser)
 }
+
+exports.tokenIsValid = async (req, res) => {
+  try {
+    const token = req.header("x-auth-token");
+    if (!token) return res.json(false);
+
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    if (!verified) return res.json(false);
+
+    const user = await User.findById(verified.id);
+    if (!user) return res.json(false);
+
+    return res.json(true);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

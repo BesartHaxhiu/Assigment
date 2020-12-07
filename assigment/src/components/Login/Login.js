@@ -1,8 +1,34 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import './Login.css'
+import React, { useState, useContext } from 'react';
+import { Link,useHistory } from "react-router-dom";
+import axios from "axios";
+import UserContext from "../../Context/userContext";
 
-const Home = () => {
+function Login () {
+    const [email, setEmail] = useState();
+    const [password, setPassword] = useState();
+    const [error, setError] = useState();
+
+    const { setUserData } = useContext(UserContext);
+    const history = useHistory();
+
+    const submit = async (e) => {
+        e.preventDefault();
+        try{
+            const loginUser = {email, password};
+            const loginResponse = await axios.post("http://localhost:5000/api/auth/login", loginUser);
+            setUserData({
+                token: loginResponse.data.token,
+                user: loginResponse.data.user
+            });
+            localStorage.setItem("auth-token", loginResponse.data.token);
+			history.push("/");
+            console.log('success')
+        } catch(err) {
+            err.response.data.msg && setError(err.response.data.msg)
+        }
+        
+    };
+    
     return (
         <div className="container h-100 mt-5">
 		<div className="d-flex justify-content-center h-100">
@@ -16,36 +42,37 @@ const Home = () => {
 		</div>
 		</div>
 		<div className="d-flex justify-content-center form_container">
-		<form>
+		<form onSubmit={submit}> 
+
 		<div className="input-group mb-3">
 		<div className="input-group-append">
 			<span className="input-group-text"><i className="fa fa-user"></i></span>
 		</div>
-		    <input type="text" name="" className="form-control input_user" value="" placeholder="username" />
+		    <input type="email" name="email" className="form-control input_user" id="email" onChange={e => setEmail(e.target.value)} placeholder="email" />
 	    </div>
+
 		<div className="input-group mb-2">
 			<div className="input-group-append">
 			<span className="input-group-text"><i className="fa fa-key"></i></span>
 			</div>
-			<input type="password" name="" className="form-control input_pass" value="" placeholder="password" />
-			</div>
-		    <div className="form-group">
-			</div>
+			<input type="password" name="password" className="form-control input_pass" id="password" onChange={e => setPassword(e.target.value)} placeholder="password" />
+		</div>
+
 			<div className="d-flex justify-content-center mt-3 login_container">
-			<button type="button" name="button" className="btn btn-outline-dark">Login</button>
+			<button type="button" type="submit" value="Login" className="btn btn-outline-dark">Login</button>
 			</div>
 			</form>
 		    </div>
 		    <div className="mt-4">
 				<div className="d-flex justify-content-center links">
 					Don't have an account? 
-                    <Link to="/signup" className="ml-2 text-primary">Sign up</Link>
+                    <Link to="/" className="ml-2 text-primary">Register</Link>
 				</div>
 			</div>
 			</div>
 		</div>
 	</div>      
-    )
+    );
 }
-
-export default Home
+ 
+export default Login;
