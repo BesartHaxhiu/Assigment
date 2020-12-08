@@ -15,7 +15,14 @@ function AuthOptions () {
             user: undefined
         })
         localStorage.setItem("auth-token","");
+        localStorage.removeItem('user');
+        localStorage.removeItem('token')
+        sessionStorage.removeItem('token')
+
+        history.push('/');
+        window.location.reload(false);
     };
+
 
     return (
         <nav className="auth-options">

@@ -1,15 +1,17 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext} from 'react';
 import { Link,useHistory } from "react-router-dom";
 import axios from "axios";
 import UserContext from "../../Context/userContext";
 
-function Login () {
+const Login = () => {
+
+	const history = useHistory();
+
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
     const [error, setError] = useState();
 
     const { setUserData } = useContext(UserContext);
-    const history = useHistory();
 
     const submit = async (e) => {
         e.preventDefault();
@@ -21,7 +23,7 @@ function Login () {
                 user: loginResponse.data.user
             });
             localStorage.setItem("auth-token", loginResponse.data.token);
-			history.push("/");
+			history.push("/home");
             console.log('success')
         } catch(err) {
             err.response.data.msg && setError(err.response.data.msg)

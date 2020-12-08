@@ -1,10 +1,11 @@
-import React,{useState, useContext} from 'react'
+import React,{useState, useContext, useEffect} from 'react'
 import axios from "axios";
 import {Link, useHistory} from 'react-router-dom';
 import UserContext from '../../Context/userContext';
 import './Register.css'
 
 const Register = () => {
+    const history = useHistory();
 
 	const [username, setUsername] = useState();
 	const [email, setEmail] = useState();
@@ -13,7 +14,6 @@ const Register = () => {
     const [error, setError] = useState();
 
 	const { setUserData } = useContext(UserContext);
-	const history = useHistory();
 
 	const submit = async (e) => {
         e.preventDefault();
@@ -29,7 +29,7 @@ const Register = () => {
                 user: loginResponse.data.user
             });
             localStorage.setItem("auth-token", loginResponse.data.token);
-            history.push("/");
+            history.push("/home");
         } catch(err) {
             err.response.data.msg && setError(err.response.data.msg)
         }
@@ -56,7 +56,7 @@ const Register = () => {
 		    <div className="input-group-append">
 			    <span className="input-group-text"><i className="fa fa-user"></i></span>
 		    </div>
-		        <input type="text" name="name" className="form-control input_user" id="name" onChange={e => setUsername(e.target.value)} placeholder="name" />
+		        <input type="text" name="name" className="form-control input_user" id="name" onChange={e => setUsername(e.target.value)} placeholder="username" />
 	        </div>
 		    
             <div className="input-group mb-3">
@@ -81,7 +81,7 @@ const Register = () => {
 		    </div>
 
 			<div className="d-flex justify-content-center mt-3 login_container">
-			<button type="submit"  name="button" className="btn btn-outline-dark">Sign up</button>
+			<button type="submit" value="Register" name="button" className="btn btn-outline-dark">Sign up</button>
 			</div>
 		</form>
 	    </div>
