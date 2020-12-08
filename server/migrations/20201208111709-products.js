@@ -4,7 +4,7 @@ module.exports = {
     // See https://github.com/seppevs/migrate-mongo/#creating-a-new-migration-script
     // Example:
     // await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: true}});
-    await db.collection('product').insertOne({
+    await db.collection('products').insertOne({
       'title': 'Iphone',
       'price': 1200,
       'publish_date': '2020-12-09',

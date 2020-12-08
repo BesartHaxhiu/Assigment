@@ -9,8 +9,9 @@ require('dotenv').config()
 connectDB()
 
 //import routes
-const authRoutes = require('./routes/auth');
 const { db } = require('./models/User');
+const authRoutes = require('./routes/auth');
+const product = require('./routes/product');
 
 const app = express();
 
@@ -19,7 +20,9 @@ app.use(bodyParser.json());
 app.use(cors());
 //routes middleware
 app.use('/api/auth', authRoutes);
+app.use('/api/products', product);
 
+//PORT
 var port = process.env.PORT || 5000;
 
 app.listen(port, function(){
