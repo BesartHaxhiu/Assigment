@@ -24,6 +24,7 @@ const Login = () => {
             });
             localStorage.setItem("auth-token", loginResponse.data.token);
 			history.push("/home");
+			history.go(0);
             console.log('success')
         } catch(err) {
             err.response.data.msg && setError(err.response.data.msg)
@@ -68,7 +69,7 @@ const Login = () => {
 		    <div className="mt-4">
 				<div className="d-flex justify-content-center links">
 					Don't have an account? 
-                    <Link to="/" className="ml-2 text-primary">Register</Link>
+                    <Link to="/register" className="ml-2 text-primary">Register</Link>
 				</div>
 			</div>
 			</div>

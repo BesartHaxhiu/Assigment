@@ -1,25 +1,35 @@
-import React from 'react'
+import React,{useState,useEffect } from 'react';
+import axios from 'axios';
+import './Product.css';
+
 
 const ProductView = () => {
-    const data = [
-        {
-            "id": "1",
-            "title": "Sleep",
-            "price": 1000,
-            "date": "24/01/42",
-            "stock": 5
-        },        
-        {
-            "id": "2",
-            "title": "Sleep2",
-            "price": 1001,
-            "date": "24/01/42",
-            "stock": 6
+
+    const [product,setProduct] = useState([''])
+    
+    const fetchProducts = async () => {
+        try{
+            await axios.get('http://localhost:5000/api/products')
+            .then((res) => {
+                setProduct(res.data)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
         }
-    ]
+        catch(err){
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        fetchProducts()
+    }, [])
+
     return (
         <div className="container">
-        <table class="table my-5">
+        <h4 className="text-center mt-5">Table of products</h4>
+        <table className="table my-5 product-table" >
         <thead>
             <tr>
             <th scope="col">ID</th>
@@ -30,14 +40,14 @@ const ProductView = () => {
             </tr>
         </thead>
         <tbody>
-            {data.map(item => {
+            {product.map(item => {
                 return (
                     <>
                     <tr>
-                <th scope="row">{item.id}</th>
+                <th scope="row">{item._id}</th>
                     <td>{item.title}</td>
                     <td>{item.price}</td>
-                    <td>{item.date}</td>
+                    <td>{item.publish_date}</td>
                     <td>{item.stock}</td>
                     </tr>
                     </>

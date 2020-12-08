@@ -81,7 +81,7 @@ const Home = () => {
 		    <div className="user_card">
 		    <div className="d-flex justify-content-center">
 		    <div className="brand_logo_container my-4">
-			<img src='https://img.pngio.com/apex-legends-icon-high-resolution-png-image-purepng-free-apex-legends-logo-png-3132_3160.png' 
+			<img src='https://cdn.clipart.email/eb4d3a89dbdd0002a84f677510ed84af_letter-p-logo-design-free-png-logo-design-ideas_640-640.jpeg' 
 			className="brand_logo" 
 			alt="Logo" 
 			/>

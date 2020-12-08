@@ -28,8 +28,10 @@ const Register = () => {
                 token: loginResponse.data.token,
                 user: loginResponse.data.user
             });
-            localStorage.setItem("auth-token", loginResponse.data.token);
-            history.push("/home");
+			localStorage.setItem("auth-token", loginResponse.data.token);
+			history.push("/home");
+			history.go(0);
+            console.log('success')
         } catch(err) {
             err.response.data.msg && setError(err.response.data.msg)
         }
